@@ -4,6 +4,8 @@ import br.com.alura.loja.modelo.Carrinho;
 import br.com.alura.loja.modelo.Produto;
 import com.thoughtworks.xstream.XStream;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.filter.LoggingFilter;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,7 +34,9 @@ public class TesteConexaoCarrinho {
 
     @Test
     public void testaQueBuscarUmCarrinhoTrazOCarrinhoEsperado() {
-        Client client = ClientBuilder.newClient();
+        ClientConfig config = new ClientConfig();
+        config.register(new LoggingFilter());
+        Client client = ClientBuilder.newClient(config);
         WebTarget target = client.target("http://localhost:8080");
         String conteudo = target.path("/carrinhos/1").request().get(String.class);
         Carrinho carrinho = (Carrinho) new XStream().fromXML(conteudo);
@@ -52,6 +56,9 @@ public class TesteConexaoCarrinho {
         Entity<String> entity = Entity.entity(xml, MediaType.APPLICATION_XML);
 
         Response response = target.path("/carrinhos").request().post(entity);
-        Assert.assertEquals("<status>sucesso</status>", response.readEntity(String.class));
+        Assert.assertEquals(201, response.getStatus());
+        String location = response.getHeaderString("Location");
+        String conteudo = client.target(location).request().get(String.class);
+        Assert.assertTrue(conteudo.contains("Tablet"));
     }
 }
