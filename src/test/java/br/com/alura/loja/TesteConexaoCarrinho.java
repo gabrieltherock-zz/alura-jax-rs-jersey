@@ -51,9 +51,8 @@ public class TesteConexaoCarrinho {
         carrinho.adiciona(new Produto(314L, "Tablet", 999, 1));
         carrinho.setRua("Rua Vergueiro");
         carrinho.setCidade("Sao Paulo");
-        String xml = carrinho.toXML();
 
-        Entity<String> entity = Entity.entity(xml, MediaType.APPLICATION_XML);
+        Entity<Carrinho> entity = Entity.entity(carrinho, MediaType.APPLICATION_XML);
 
         Response response = target.path("/carrinhos").request().post(entity);
         Assert.assertEquals(201, response.getStatus());
